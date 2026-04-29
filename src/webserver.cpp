@@ -28,6 +28,36 @@
 AsyncWebServer server(80);
 AsyncEventSource serialEvents("/serial-events");
 
+const char ROOT_PAGE_HTML[] PROGMEM = R"rawliteral(
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>GAIA A08</title>
+        <style>
+            body { margin: 0; font-family: system-ui, sans-serif; background: #f5f7fb; color: #1f2937; }
+            .wrap { max-width: 520px; margin: 48px auto; padding: 0 16px; }
+            h1 { margin: 0 0 18px 0; font-size: 1.5rem; }
+            ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+            a { display: block; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 10px; text-decoration: none; color: #111827; background: #ffffff; }
+            a:hover { background: #eef2ff; }
+            .hint { margin-top: 14px; color: #6b7280; font-size: 0.95rem; }
+        </style>
+    </head>
+    <body>
+        <main class="wrap">
+            <h1>GAIA A08</h1>
+            <ul>
+                <li><a href="/serial">Open Serial Console</a></li>
+                <li><a href="/realtime">Open Status JSON</a></li>
+            </ul>
+            <p class="hint">Use this page as a quick launcher for diagnostics.</p>
+        </main>
+    </body>
+</html>
+)rawliteral";
+
 const char SERIAL_PAGE_HTML[] PROGMEM = R"rawliteral(
 <!doctype html>
 <html>
@@ -103,6 +133,10 @@ void webServerRealtimeHandler(AsyncWebServerRequest *request)
 
 void webServerInit()
 {
+
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", ROOT_PAGE_HTML);
+    });
 
     server.on("/realtime", HTTP_GET, webServerRealtimeHandler);
     server.on("/serial-backlog", HTTP_GET, [](AsyncWebServerRequest *request) {
