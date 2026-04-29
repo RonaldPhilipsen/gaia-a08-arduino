@@ -28,6 +28,15 @@ server from which one can get the real-time data.
 */
 #define CONF_USE_WEB_SERVER
 
+/*
+CONF_USE_ARDUINO_OTA: If defined, the device accepts OTA firmware
+updates over the local network once Wi-Fi is connected.
+*/
+#define CONF_USE_ARDUINO_OTA
+
+// Optional ArduinoOTA password. Leave commented to allow LAN OTA without auth.
+// #define CONF_ARDUINO_OTA_PASSWORD "change-me"
+
 // Get your own token from  https://aqicn.org/data-platform/token/
 #define TOKEN "dummy-token-for-test-purpose-only"
 

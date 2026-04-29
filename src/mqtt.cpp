@@ -18,6 +18,7 @@
 
 #include "sensors.hpp"
 #include "main.hpp"
+#include "network.hpp"
 
 #ifdef CONF_MQTT
 
@@ -28,6 +29,37 @@
 #include "mqtt_client.h"
 
 esp_mqtt_client_handle_t client;
+static volatile bool mqtt_paused = false;
+
+void mqttSetPaused(bool paused)
+{
+    if (mqtt_paused == paused)
+    {
+        return;
+    }
+
+    mqtt_paused = paused;
+
+    if (client == nullptr)
+    {
+        return;
+    }
+
+    if (paused)
+    {
+        esp_mqtt_client_stop(client);
+        Serial.println("MQTT paused for OTA");
+    }
+    else
+    {
+        if (esp_mqtt_client_start(client) != ESP_OK)
+        {
+            Serial.println("Failed to restart MQTT client after OTA");
+            return;
+        }
+        Serial.println("MQTT resumed after OTA");
+    }
+}
 
 void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
@@ -54,6 +86,12 @@ void mqttWorker(void *params)
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS); // 10 seconds
+
+        if (mqtt_paused || otaIsInProgress())
+        {
+            continue;
+        }
+
         // Check WiFi connection status
         if (WiFi.status() != WL_CONNECTED)
         {
@@ -95,6 +133,7 @@ void mqttInit()
     }
 
     esp_err_t err;
+    mqtt_paused = false;
     client = esp_mqtt_client_init(&mqtt_cfg);
     if (client == nullptr)
     {

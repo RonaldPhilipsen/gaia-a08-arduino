@@ -31,6 +31,29 @@ the `config.h` file.
 #define WIFI_PASS "yourNetworkPassword"
 ```
 
+### OTA uploads
+
+Platform IO builds now enable ArduinoOTA by default when `CONF_USE_ARDUINO_OTA`
+is defined in `include/config.hpp`. Once the device is on Wi-Fi, it advertises
+itself with the same hostname as the generated station ID, for example
+`GAIA-A08-1234`.
+
+Use the dedicated OTA environment and pass the IP address or resolvable
+hostname at upload time:
+
+```sh
+pio run -e ota -t upload --upload-port 192.168.1.50
+```
+
+or:
+
+```sh
+pio run -e ota -t upload --upload-port GAIA-A08-1234.local
+```
+
+If you want to require a password for OTA, uncomment
+`CONF_ARDUINO_OTA_PASSWORD` in `include/config.hpp`.
+
 ## Libraries
 
 The firmware uses the following libraries:

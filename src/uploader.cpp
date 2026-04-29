@@ -19,6 +19,7 @@
 #include <WiFi.h>
 #include "sensors.hpp"
 #include "main.hpp"
+#include "network.hpp"
 #include <HTTPClient.h>
 
 void UploadDataToAQIC(unsigned char *json_body, size_t request_len)
@@ -62,6 +63,12 @@ void uploaderWorker(void *params)
     while (1)
     {
         vTaskDelay(60 * 1000 / portTICK_PERIOD_MS);
+
+        if (otaIsInProgress())
+        {
+            continue;
+        }
+
         // Check WiFi connection status
         if (WiFi.status() != WL_CONNECTED)
         {

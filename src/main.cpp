@@ -59,6 +59,9 @@ void setup()
     uploaderInit();
 
     wifiInit();
+#ifdef CONF_USE_ARDUINO_OTA
+    otaInit();
+#endif
 #ifdef CONF_MQTT
     mqttInit();
 #endif
@@ -69,5 +72,8 @@ void setup()
 
 void loop()
 {
+#ifdef CONF_USE_ARDUINO_OTA
+    otaLoop();
+#endif
     rgbLedLoop();
 }
