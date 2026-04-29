@@ -18,6 +18,8 @@
 
 #include "sensors.hpp"
 #include "main.hpp"
+#include "network.hpp"
+#include <WiFi.h>
 #include <Wire.h>
 
 bool i2c_initialized = false;
@@ -44,6 +46,16 @@ bool getMinimalSensorData(JsonDocument &doc)
 
     doc["station"]["location"]["latitude"] = LATITUDE;
     doc["station"]["location"]["longitude"] = LONGITUDE;
+    doc["status"]["wifi"] = wifiIsConnected() ? "connected" : "disconnected";
+    doc["status"]["mqtt"] = mqttIsConnected() ? "connected" : "disconnected";
+    if (wifiIsConnected())
+    {
+        doc["status"]["wifi_ip"] = WiFi.localIP().toString();
+        doc["status"]["wifi_rssi_dbm"] = WiFi.RSSI();
+        doc["status"]["wifi_ssid"] = WiFi.SSID();
+        doc["status"]["wifi_bssid"] = WiFi.BSSIDstr();
+        doc["status"]["wifi_channel"] = WiFi.channel();
+    }
     doc["readings"]["pm1"] = pm1.avg();
     doc["readings"]["pm25"] = pm25.avg();
     doc["readings"]["pm10"] = pm10.avg();

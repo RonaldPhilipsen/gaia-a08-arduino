@@ -18,6 +18,7 @@
 
 #include "sensors.hpp"
 #include "main.hpp"
+#include "network.hpp"
 
 #ifdef CONF_MQTT
 
@@ -28,6 +29,12 @@
 #include "mqtt_client.h"
 
 esp_mqtt_client_handle_t client;
+static volatile bool mqtt_connected = false;
+
+bool mqttIsConnected()
+{
+    return wifiIsConnected() && mqtt_connected;
+}
 
 void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
@@ -35,9 +42,11 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
     switch (event_id)
     {
     case MQTT_EVENT_CONNECTED:
+        mqtt_connected = true;
         Serial.println("Connected to MQTT Broker!");
         break;
     case MQTT_EVENT_DISCONNECTED:
+        mqtt_connected = false;
         Serial.println("Disconnected from MQTT Broker.");
         break;
     case MQTT_EVENT_PUBLISHED:
@@ -98,6 +107,7 @@ void mqttInit()
     client = esp_mqtt_client_init(&mqtt_cfg);
     if (client == nullptr)
     {
+        mqtt_connected = false;
         Serial.println("Failed to create MQTT client");
         return;
     }
@@ -106,6 +116,7 @@ void mqttInit()
     err = esp_mqtt_client_start(client);
     if (err != ESP_OK)
     {
+        mqtt_connected = false;
         Serial.println("Failed to start the MQTT client");
         return;
     }
@@ -118,5 +129,12 @@ void mqttInit()
         3,            // Task priority - medium
         NULL          // Task handle
     );
+}
+#endif
+
+#ifndef CONF_MQTT
+bool mqttIsConnected()
+{
+    return false;
 }
 #endif

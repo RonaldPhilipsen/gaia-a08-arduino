@@ -20,6 +20,11 @@
 #include <HTTPClient.h>
 #include "main.hpp"
 
+bool wifiIsConnected()
+{
+    return WiFi.status() == WL_CONNECTED;
+}
+
 #ifdef CONF_USE_WIFI_MANAGER
 #include <WiFiManager.h>
 WiFiManager wifiManager;
@@ -33,7 +38,7 @@ void wifiInit()
 #else
     WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-    while (WiFi.status() != WL_CONNECTED)
+    while (!wifiIsConnected())
     {
         // Check for the connection
         vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -5,6 +5,8 @@
 #include <ArduinoJson.h>
 
 void wifiInit();
+bool wifiIsConnected();
+bool mqttIsConnected();
 void webServerInit();
 
 #ifdef CONF_MQTT
