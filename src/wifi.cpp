@@ -19,6 +19,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include "main.hpp"
+#include "logger.hpp"
 
 #ifdef CONF_USE_WIFI_MANAGER
 #include <WiFiManager.h>
@@ -37,12 +38,12 @@ void wifiInit()
     {
         // Check for the connection
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        Serial.println("Trying to connecting to WiFi..");
+        webLogPrintln("Trying to connecting to WiFi..");
     }
 #endif
 
-    Serial.print("Connected to the WiFi network with IP address: ");
+    webLogPrint("Connected to the WiFi network with IP address: ");
 
     IPAddress ip = WiFi.localIP();
-    Serial.println(ip);
+    webLogPrintln(ip.toString());
 }

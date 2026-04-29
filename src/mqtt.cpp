@@ -18,6 +18,7 @@
 
 #include "sensors.hpp"
 #include "main.hpp"
+#include "logger.hpp"
 
 #ifdef CONF_MQTT
 
@@ -35,13 +36,13 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
     switch (event_id)
     {
     case MQTT_EVENT_CONNECTED:
-        Serial.println("Connected to MQTT Broker!");
+        webLogPrintln("Connected to MQTT Broker!");
         break;
     case MQTT_EVENT_DISCONNECTED:
-        Serial.println("Disconnected from MQTT Broker.");
+        webLogPrintln("Disconnected from MQTT Broker.");
         break;
     case MQTT_EVENT_PUBLISHED:
-        Serial.println("Data published to MQTT Broker");
+        webLogPrintln("Data published to MQTT Broker");
         break;
     default:
         break;
@@ -57,13 +58,14 @@ void mqttWorker(void *params)
         // Check WiFi connection status
         if (WiFi.status() != WL_CONNECTED)
         {
-            Serial.println("Error in WiFi connection");
+            webLogPrintln("Error in WiFi connection");
             return;
         }
 
         JsonDocument doc;
         if (!getMinimalSensorData(doc))
         {
+            webLogPrintln("MQTT: no sensor data available yet");
             return;
         }
         size_t json_len = measureJson(doc);
@@ -74,7 +76,7 @@ void mqttWorker(void *params)
 
         if (esp_mqtt_client_publish(client, "GAIA/data", (char *)json_body, json_len, 1, 0) == -1)
         {
-            Serial.println("Failed to publish data to MQTT Broker");
+            webLogPrintln("Failed to publish data to MQTT Broker");
         }
     }
 }
@@ -90,7 +92,7 @@ void mqttInit()
 
     if (strlen(mqtt_cfg.uri) == 0)
     {
-        Serial.println("Can not start the MQTT client: MQTT_BROKER_URI is not defined");
+        webLogPrintln("Can not start the MQTT client: MQTT_BROKER_URI is not defined");
         return;
     }
 
@@ -98,7 +100,7 @@ void mqttInit()
     client = esp_mqtt_client_init(&mqtt_cfg);
     if (client == nullptr)
     {
-        Serial.println("Failed to create MQTT client");
+        webLogPrintln("Failed to create MQTT client");
         return;
     }
 
@@ -106,7 +108,7 @@ void mqttInit()
     err = esp_mqtt_client_start(client);
     if (err != ESP_OK)
     {
-        Serial.println("Failed to start the MQTT client");
+        webLogPrintln("Failed to start the MQTT client");
         return;
     }
 

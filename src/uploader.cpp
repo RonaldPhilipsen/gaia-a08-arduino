@@ -19,6 +19,7 @@
 #include <WiFi.h>
 #include "sensors.hpp"
 #include "main.hpp"
+#include "logger.hpp"
 #include <HTTPClient.h>
 
 void UploadDataToAQIC(unsigned char *json_body, size_t request_len)
@@ -34,14 +35,14 @@ void UploadDataToAQIC(unsigned char *json_body, size_t request_len)
     {
 
         String response = http.getString();
-        Serial.println(httpResponseCode);
-        Serial.println(response);
+        webLogPrintln(String(httpResponseCode));
+        webLogPrintln(response);
     }
     else
     {
 
-        Serial.print("Error on sending POST: ");
-        Serial.println(httpResponseCode);
+        webLogPrint("Error on sending POST: ");
+        webLogPrintln(String(httpResponseCode));
     }
 
     http.end();
@@ -65,13 +66,14 @@ void uploaderWorker(void *params)
         // Check WiFi connection status
         if (WiFi.status() != WL_CONNECTED)
         {
-            Serial.println("Error in WiFi connection");
+            webLogPrintln("Error in WiFi connection");
             return;
         }
 
         JsonDocument doc;
         if (!getSerialisedSensorData(doc))
         {
+            webLogPrintln("Uploader: no sensor data available yet");
             return;
         }
         uploaderResetCurrentStatus();
@@ -80,7 +82,7 @@ void uploaderWorker(void *params)
         static unsigned char json_body[512]; // expected json len is 422
         serializeJson(doc, json_body, sizeof(json_body));
 
-        Serial.printf("Posting: %s with len %d \n", json_body, json_len);
+        webLogPrintf("Posting: %s with len %d \n", json_body, json_len);
         UploadDataToAQIC(json_body, json_len);
     }
 }

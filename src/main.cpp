@@ -29,6 +29,7 @@
 #include "sensors.hpp"
 #include "indicator.hpp"
 #include "network.hpp"
+#include "logger.hpp"
 #include "uploader.hpp"
 
 // -----------------------
@@ -41,13 +42,13 @@ void getStationId()
     snprintf(mac, 32, "%llx", efuseMac);
     uint16_t chip = (uint16_t)(efuseMac >> 32);
     snprintf(stationID, 32, "GAIA-A08-%x", chip);
-    Serial.printf("device ID is '%s'\n", stationID);
+    webLogPrintf("device ID is '%s'\n", stationID);
 }
 
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("starting...");
+    webLogPrintln("starting...");
 
     getStationId();
 
